@@ -6,7 +6,7 @@ KiCad project for the Pico driver board. The brief is [docs/PCB_DESIGN_BRIEF.md]
 
 ## Status (Nov 16, 2026)
 
-**Stopped at gate G1.** The datasheet checks, the architecture, the pin map and the bit-order mapping are done. No schematic exists yet, because the driver section depends on open inputs 1, 4, 7 and 8 below.
+**Stopped at gate G1.** The datasheet checks, the architecture, the pin map and the bit-order mapping are done. Input 1 was answered on Nov 17 (bistable), which confirms H-bridges. No schematic exists yet. Inputs 2 to 5, 7 and 8 are still open; without 2 to 5 the fuse, supply, trace widths and bulk capacitor cannot be sized.
 
 ## Open inputs (gate G1)
 
@@ -14,7 +14,7 @@ Nothing in this table may be guessed. Sizing, the fuse, the connector and the sc
 
 | # | Question | Why it matters | Answer |
 |---|---|---|---|
-| 1 | Are the cells bistable (a coil polarity reversal flips the cam, no holding current)? | If not, H-bridges are wrong and the driver section changes. | |
+| 1 | Are the cells bistable (a coil polarity reversal flips the cam, no holding current)? | If not, H-bridges are wrong and the driver section changes. | **Yes** (cells teammate, via David, Nov 17, 2026) |
 | 2 | Coil resistance (ohms), per dot | Current and driver headroom. | |
 | 3 | Coil supply voltage that flips a dot reliably | Sets VM. The DRV8833 accepts 2.7 V to 10.8 V. | |
 | 4 | Current per coil while pulsing (A) | Driver margin, trace width, fuse, supply, bulk capacitance. Above about 1 A is a stop. | |
