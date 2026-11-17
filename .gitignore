@@ -24,3 +24,7 @@ fp-info-cache
 Thumbs.db
 desktop.ini
 ._*
+
+# Large datasheets (URLs and checksums in hardware/pcb/datasheets/README.md)
+hardware/pcb/datasheets/pico-datasheet.pdf
+hardware/pcb/datasheets/pico-2-datasheet.pdf
