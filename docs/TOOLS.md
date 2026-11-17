@@ -13,7 +13,7 @@
 | tesseract | 5.5.4 | `brew install tesseract` (eng + osd only) |
 | liblouis | 3.39.0 | `brew install liblouis`. Python bindings (`louis`) come from the brew package, exposed to `.venv` through a `.pth` file pointing at `/opt/homebrew/Cellar/liblouis/3.39.0/lib/python3.15/site-packages`. If `brew upgrade liblouis` changes the version, update that path. Tables: `/opt/homebrew/share/liblouis/tables` (use `unicode.dis` + `en-ueb-g1.ctb` for uncontracted UEB). |
 | gh | already installed | logged in |
-| KiCad | PENDING | `brew install --cask kicad` (10.0.8) needs sudo; to be run by hand |
+| KiCad | 10.0.8 | `brew install --cask kicad`, full app in `/Applications/KiCad/`. `kicad-cli` symlinked: `ln -s /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli /opt/homebrew/bin/kicad-cli` |
 
 The Pico runs MicroPython. Firmware images are flashed manually, not downloaded by tooling.
 
