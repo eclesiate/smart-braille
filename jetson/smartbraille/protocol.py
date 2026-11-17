@@ -1,27 +1,43 @@
 """Serial protocol between the Jetson and the Pico.
 
-PROPOSAL, to be agreed with whoever writes the Pico firmware. CLAUDE.md
-fixes the shape (start byte, 8 cell bytes, checksum, end byte, ack). The
-byte values, the checksum rule and the button bytes below are choices made
-here and are listed in jetson/README.md.
+CLAUDE.md fixes the frame's shape (start byte, 8 cell bytes, checksum, end
+byte, ack). The byte values, the checksum rule, the button bytes and the
+beep command are choices made here and are listed in jetson/README.md.
 
 Jetson -> Pico, 11 bytes:
     STX (0x02), 8 cell bytes, checksum, ETX (0x03)
     cell byte: bit 0 = dot 1 ... bit 5 = dot 6, bits 6 and 7 zero
     checksum: XOR of the 8 cell bytes
 
+Jetson -> Pico, 2 bytes:
+    BEL (0x07), pattern (0..3): sound pattern + 1 short beeps
+
 Pico -> Jetson, single bytes:
     ACK (0x06)  frame accepted and shown
-    NAK (0x15)  frame rejected (bad length, checksum or cell byte)
+    NAK (0x15)  frame rejected (bad checksum or cell byte) or not shown
     'S' 'B' 'N' 'P'  button pressed: Scan, Back, Next, Play/Pause
+
+The Pico side is firmware/pico/frames.py. test/test_firmware.py runs the
+two against each other.
 """
 
-from .paging import Button
+from .paging import Beep, Button
 
 STX = 0x02
 ETX = 0x03
 ACK = 0x06
+BEL = 0x07
 NAK = 0x15
+
+# The Pico beeps once by itself on every button press, so "scan started"
+# needs no command. Counts are placeholders to tune with a real user.
+BEEP_PATTERN = {Beep.READY: 1, Beep.LIMIT: 2, Beep.ERROR: 3}
+
+
+def encode_beep(beep):
+    """Return the bytes to send for a beep, or b'' if none is needed."""
+    pattern = BEEP_PATTERN.get(beep)
+    return b"" if pattern is None else bytes([BEL, pattern])
 CELLS = 8
 FRAME_LEN = CELLS + 3
 

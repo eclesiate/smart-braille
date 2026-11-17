@@ -45,8 +45,8 @@ python test/ocr_accuracy.py --synthetic 116 220 285
 
 ## Assumptions
 
-- **Serial protocol details are a proposal.** CLAUDE.md fixes the frame shape. These parts were chosen here and need agreeing with the Pico firmware: start byte 0x02, end byte 0x03, checksum = XOR of the 8 cell bytes, ack 0x06, nak 0x15, and the Pico reporting buttons as single bytes `S` `B` `N` `P`. Cell byte: bit 0 = dot 1 ... bit 5 = dot 6.
-- **The buzzer has no command yet.** The reader decides when to beep (scan started, ready, end of text, no text found), but the frame has no way to tell the Pico. For now beeps are only printed. Either the Pico beeps on its own for button presses, or the protocol gains a beep byte.
+- **Serial protocol details were chosen here.** CLAUDE.md fixes the frame shape. The rest: start byte 0x02, end byte 0x03, checksum = XOR of the 8 cell bytes, ack 0x06, nak 0x15, and the Pico reporting buttons as single bytes `S` `B` `N` `P`. Cell byte: bit 0 = dot 1 ... bit 5 = dot 6. `firmware/pico/frames.py` implements the same thing and `test/test_firmware.py` runs the two against each other.
+- **Beeps.** The Pico beeps once by itself on each button press. The Jetson sends 0x07 plus a pattern byte for the rest: 2 beeps when a scan is ready, 3 at the end of the text, 4 when no text was found. The counts are placeholders.
 - **Auto-advance interval** for Play is 3 s per window, a placeholder to tune with a real reader.
 - **Page finding uses a brightness threshold**, not the edge map in the 498A design. It relies on the base being matte black and darker than the paper.
 - **The page is assumed upright.** A page placed upside down or sideways is not detected or rotated yet.

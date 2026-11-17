@@ -30,6 +30,9 @@ class VirtualDisplay:
         self.out(braille.to_unicode(cells))
         self.out(render(cells))
 
+    def beep(self, beep):
+        self.out(f"[beep: {beep.value}]")
+
     def poll_buttons(self):
         return []
 
@@ -54,6 +57,11 @@ class SerialDisplay:
             if self._wait_ack():
                 return
         raise TimeoutError("the display did not acknowledge the frame")
+
+    def beep(self, beep):
+        command = protocol.encode_beep(beep)
+        if command:
+            self.port.write(command)
 
     def poll_buttons(self):
         """Return buttons pressed since the last call."""

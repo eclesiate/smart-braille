@@ -37,7 +37,8 @@ class App:
 
     def _apply(self, output):
         if output.beep:
-            self.log(f"[beep: {output.beep.value}]")
+            for d in self.displays:
+                d.beep(output.beep)
         if output.scan:
             self.result = pipeline.scan(self.camera.capture())
             times = ", ".join(f"{k} {v:.2f} s" for k, v in self.result.timings_s.items())
