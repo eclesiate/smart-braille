@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# KiCad
+*-backups/
+*.kicad_prl
+*.bak
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.lck
+_autosave-*
+fp-info-cache
+*.net
+*-cache.lib
+*-rescue.lib
+*-rescue.dcm
+\#auto_saved_files#
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+._*
