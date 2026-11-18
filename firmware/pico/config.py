@@ -23,10 +23,9 @@ MAX_DOTS_PER_PULSE = 6
 # wrong way.
 INVERT = [0, 0, 0, 0, 0, 0, 0, 0]
 
-# VM monitor on GP26. VM_DIVIDER is (top + bottom) / bottom of the resistor
-# divider; both stay None until the divider is designed, which disables
-# the check.
-VM_DIVIDER = None
+# VM monitor on GP26: 220k over 68k on the schematic, so VM = ADC volts x 288/68.
+# VM_MIN_V stays None (check disabled) until the coil voltage is measured.
+VM_DIVIDER = (220 + 68) / 68
 VM_MIN_V = None
 
 SPI_BAUD = 1_000_000

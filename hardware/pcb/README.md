@@ -4,9 +4,27 @@
 
 KiCad project for the Pico driver board. The brief is [docs/PCB_DESIGN_BRIEF.md](../../docs/PCB_DESIGN_BRIEF.md). Schematic first, every BOM line gets an LCSC part number, ERC and DRC clean via `kicad-cli`. A human reviews the layout before any order.
 
-## Status (Nov 16, 2026)
+## Status (Nov 18, 2026)
 
-**Stopped at gate G1.** The datasheet checks, the architecture, the pin map and the bit-order mapping are done. Input 1 was answered on Nov 17 (bistable), which confirms H-bridges. No schematic exists yet. Inputs 2 to 5, 7 and 8 are still open; without 2 to 5 the fuse, supply, trace widths and bulk capacitor cannot be sized.
+**Draft schematic done, still at gate G1.** Input 1 was answered on Nov 17 (bistable), which confirms H-bridges. The schematic (`smartbraille_driver.kicad_sch` plus `cell.kicad_sch` used eight times) is complete except for the parts that depend on inputs 2 to 5: fuse, bulk capacitor, TVS, gate zener and the timeout R and C. Those are on the schematic as "TBD", marked not fitted. ERC is clean and KiCad's netlist matches the intended one pin for pin.
+
+Not done yet: LCSC numbers for passives, connectors and the timeout chip; the G3 pin check against the datasheets of the stocked (non-TI) parts; layout.
+
+## Working on the schematic
+
+The schematic is generated. Do not edit the `.kicad_sch` files in the GUI; changes would be overwritten.
+
+```
+python hardware/pcb/gen/gen_schematic.py   # writes the schematic, design.json, SCHEMATIC_SUMMARY.md
+python hardware/pcb/gen/check_netlist.py   # ERC + KiCad netlist vs. design.json
+```
+
+- `gen/gen_schematic.py` holds every part and every pin-to-net assignment. It refuses to run if a KiCad library symbol's pin names differ from the datasheet pin table written into it.
+- [SCHEMATIC_SUMMARY.md](SCHEMATIC_SUMMARY.md) lists every part and every net in plain language (gate G2).
+- `smartbraille.kicad_sym` is a copy of KiCad's DRV8833PWP symbol with three pin types corrected (below). Pin numbers and names are unchanged.
+- The project has its own `sym-lib-table` and `fp-lib-table`, so it opens the same way on any machine with KiCad 10.
+
+Open it in KiCad to look, not to edit: `open hardware/pcb/smartbraille_driver.kicad_pro`.
 
 ## Open inputs (gate G1)
 
@@ -55,7 +73,10 @@ To move a cell, firmware puts the pattern on the bus, selects the cell on the de
 4. **Pull resistor values.** /OE pull-up and CELL_EN pull-down are 4.7 kOhm, not 10 kOhm. An RP2040 pin in reset has a 50 to 80 kOhm internal pull-down, which drags a 10 kOhm pull-up to 2.75 V. That still reads high, but 4.7 kOhm gives 3.0 V. On a Pico 2, erratum RP2350-E9 needs an external pull-down of 8.2 kOhm or less to hold a pin low when its input buffer is on.
 5. **Two capacitors the brief's parts list left out.** Each DRV8833 needs 10 nF from VCP to VM and 2.2 uF from VINT to GND, as well as the 10 uF on VM (DRV8833 p3, p15).
 6. **Pico datasheets are not committed.** They total 21 MB. `datasheets/README.md` has their URLs and checksums.
-7. **Planned: a hardware timeout on CELL_EN.** If MicroPython stops with a cell enabled, the coil stays driven until the watchdog fires. A capacitor-coupled enable would cut the cell off after a fixed time regardless of firmware. It needs the pulse length (input 5) before it can be sized, and it will have a bypass jumper. The brief assigns the pulse cap to firmware; this is a backstop, not a replacement.
+7. **Hardware timeout on the cell enable (U4, 74LVC1G123).** If MicroPython hangs with a cell enabled, the coil would stay driven until the watchdog fires (1 s). A rising CELL_EN triggers a one-shot through the chip's clear input (A held low, B held high; SN74LVC1G123 datasheet p3), so the decoder only sees the enable for a fixed time set by an R and C, and CELL_EN going low ends it at once. The R and C need the pulse length (input 5), so they are not fitted, and solder jumper JP1 is made 1-2 at the factory, which bypasses the timeout. To use it: fit R and C, cut JP1 1-2, bridge 2-3. **Do not bridge 2-3 without the R and C fitted**: the timing pin would float. The brief gives the pulse cap to firmware; this is a backstop, not a replacement.
+8. **Corrected pin types in the DRV8833 symbol.** KiCad's stock symbol makes VINT a power input (it is the output of the chip's internal regulator and needs only a capacitor, p3) and the ISEN pins bidirectional (they are the bridge ground returns, tied to GND here, p4 and p10). With the stock types ERC reports 72 false errors. Only the electrical type changed.
+9. **The VM divider returns to the Pico's AGND pin**, not to GND. It joins GND inside the Pico, and keeps divider current out of the ground the coils share. KiCad's Pico symbol types AGND as a power output, so wiring it to GND directly is an ERC error.
+10. **A "VM on" LED** (D4 with 2.2 kOhm) and a 2-pin reset header on the Pico's RUN pin were added for bring-up.
 
 ## Pico pin map
 
@@ -143,7 +164,7 @@ The pin tables above use TI datasheets. The parts JLCPCB stocks are from other m
 How the four hard requirements in section 7 of the brief are met.
 
 1. **Pico unpowered, in reset, or before firmware runs: no coil driven.** Two independent barriers. CELL_EN is pulled down, so the decoder holds all eight nSLEEP lines low and every DRV8833 is asleep with high-Z outputs. /OE is pulled up, so the bus is high-Z and the DRV8833 internal pull-downs hold every input low (coast). Each nSLEEP line also has its own 10 kOhm pull-down, so the drivers stay asleep even if the decoder is missing or unpowered.
-2. **VM present, Pico unpowered.** The 3V3 rail is off, so the decoder and shift registers are unpowered and cannot drive anything high. The nSLEEP pull-downs keep the drivers asleep. One side effect: the VM monitor divider feeds a small current into GP26 through the pin's protection diode. The divider will be sized to keep that under 50 uA.
+2. **VM present, Pico unpowered.** The 3V3 rail is off, so the decoder and shift registers are unpowered and cannot drive anything high. The nSLEEP pull-downs keep the drivers asleep. One side effect: the VM monitor divider feeds a small current into GP26 through the pin's protection diode. With the 220 kOhm top resistor that is about 20 uA at 5 V and under 55 uA even at the DRV8833's 11.8 V absolute maximum.
 3. **Pico powered, VM off.** TI states logic signals may be present before VM (DRV8833 p14), and the inputs carry a rating that does not depend on VM (p5), so there is no back-powering path through an input diode to VM. In normal operation the bus is high-Z and the nSLEEP lines are low anyway. Firmware also reads the VM monitor and refuses to pulse when VM is absent.
 4. **Only an enabled cell can move.** A sleeping DRV8833 has high-Z outputs whatever its inputs are (p11), and the decoder can wake only one cell. The supply-side limit (fuse and trace sizing) waits for input 4.
 
