@@ -49,7 +49,12 @@ Only what you have actually seen. Do not run a coil longer or harder to find out
 
 | Item | Answer |
 |---|---|
+| Scale factor against the Hackaday reference cell (e.g. 3x) | |
+| Does every coil have both of its leads brought out separately (12 wires per cell)? Or are the coils joined to a common wire inside the cell (7 wires)? | |
 | How do the coil leads leave the cell? (loose magnet wire, soldered pins, a small PCB) | |
+| Core material and size (the reference uses a 1 x 10 mm ferrite rod; steel overheated) | |
+| Coil wire diameter (mm) and approximate number of turns | |
+| Magnet size and type | |
 | Lead length available to reach a connector (mm) | |
 | Wire gauge of the coil leads | |
 | Dots per cell | |
