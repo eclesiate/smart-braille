@@ -38,8 +38,8 @@ Nothing in this table may be guessed. Sizing, the fuse, the connector and the sc
 | 4 | Current per coil while pulsing (A) | Driver margin, trace width, fuse, supply, bulk capacitance. Above about 1 A is a stop. | |
 | 5 | Pulse length that flips a dot reliably (ms), and the safe maximum | Firmware pulse cap, hardware timeout, thermal sizing. | |
 | 6 | Dots per cell, cell count | Assumed 6 and 8. | |
-| 7 | How do the coil leads leave a cell? (loose wires, pins, a small cell PCB) | Connector type and pin order. | |
-| 8 | Did the breadboard prototype use a particular driver that works? | A proven driver beats a new one. | |
+| 7 | How do the coil leads leave a cell? (loose wires, pins, a small cell PCB) | Connector type and pin order. | Open. The cell is a scaled copy of the Hackaday reference, which brings out 12 separate leads (see `hardware/cell/README.md`). Need confirmation that ours does too, not 6 coils on a common wire. |
+| 8 | Did the breadboard prototype use a particular driver that works? | A proven driver beats a new one. | Open for our breadboard. The reference used transistor-array half-bridges with a common line per cell; no electrical numbers published. |
 
 ## Architecture
 
